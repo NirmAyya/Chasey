@@ -24,10 +24,9 @@ NIRM_IMAGE = pygame.transform.scale(NIRM_IMAGE, (50, 100))
 GRASS = pygame.image.load('Chasey/objects/background.jpg')
 GRASS = pygame.transform.scale(GRASS, RES)
 
-# Sounds
-mixer.init()
-mixer.music.load("Chasey/objects/brownieBark.mp3")
-mixer.music.set_volume(0.5)
+# Load sounds
+bark_sound = pygame.mixer.Sound('Chasey/objects/brownieBark.mp3')
+footsteps_sound = pygame.mixer.Sound('Chasey/objects/Footsteps.mp3')
 
 # Score
 score_value = 0
@@ -44,6 +43,19 @@ def randBool():
 # Distance function
 def distance(rectA, rectB):
     return math.hypot(rectA.x - rectB.x, rectA.y - rectB.y)
+
+# Play footsteps sound in a loop while the player is moving
+def play_footsteps(playing):
+    if playing:
+        if not pygame.mixer.get_busy():  # Check if any sound is currently playing
+            footsteps_sound.play(-1)  # Loop indefinitely
+    else:
+        footsteps_sound.stop()  # Stop playing
+
+# Play a random bark sound
+def play_random_bark():
+    if random.random() < 0.01:  # Adjust the probability as needed
+        bark_sound.play()
 
 # Enemy sprite class
 class Enemy(pygame.sprite.Sprite):
@@ -191,6 +203,12 @@ while running:
     # Check if the player has caught the boss
     if distance(NirmRect, boss.rect) < 25:  # Adjusted to allow for some proximity
         running = False
+
+    # Play footsteps sound if player is moving
+    play_footsteps(player_moving)
+
+    # Play random bark sound
+    play_random_bark()
 
     # Draw everything
     screen.blit(GRASS, (0, 0))
